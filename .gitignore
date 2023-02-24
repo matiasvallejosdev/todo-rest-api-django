@@ -184,3 +184,11 @@ fabric.properties
 
 # *.iml
 # modules.xml
+
+### Ignore
+docs/
+
+### Ignore for IntelliJ
+*.iml
+*.ipr
+*.idea
