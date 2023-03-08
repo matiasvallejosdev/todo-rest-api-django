@@ -19,11 +19,9 @@
             password: ${{ secrets.DOCKERHUB_TOKEN }}
         - name: Checkout
           uses: actions/checkout@main
-        - name: Lint
-          run: docker-compose run --rm app sh -c "flake8"
         - name: Test
           run: docker-compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
           env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             DJ_SECRET_KEY: ${{ secrets.DJ_SECRET_KEY }}
+        - name: Lint
+          run: docker-compose run --rm app sh -c "flake8"
