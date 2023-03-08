@@ -1,13 +1,13 @@
-  ---
-  name: Django CI with Tests and Linting
+---
+name: Django CI with Tests and Linting
 
-  on:
-    push:
-      branches: [ "main" ]
-    pull_request:
-      branches: [ "main" ]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-  jobs:
+jobs:
     test-lint:
       name: Test and Lint
       runs-on: ubuntu-20.04
