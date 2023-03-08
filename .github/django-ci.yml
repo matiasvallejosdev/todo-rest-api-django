@@ -1,0 +1,29 @@
+---
+name: Django CI with Tests and Linting
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-lint:
+    name: Test and Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@main
+      - name: Test
+        run: docker-compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DJ_SECRET_KEY: ${{ secrets.DJ_SECRET_KEY }}
+      - name: Lint
+        run: docker-compose run --rm app sh -c "flake8"
