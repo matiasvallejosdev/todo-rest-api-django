@@ -3,17 +3,15 @@ Todo settings.py
 """
 import sys
 import os
-from dotenv import load_dotenv, find_dotenv
+import dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment
-ENV_FILE = find_dotenv()
-
-if ENV_FILE:
-    load_dotenv(ENV_FILE)
+dotenv_path = os.path.join(BASE_DIR, '.env')
+dotenv.load_dotenv(dotenv_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -22,9 +20,9 @@ if ENV_FILE:
 SECRET_KEY = os.environ.get('DJ_SECRET_KEY', 'django-insecure-37cbt(ocio2#r4=ajf1^_p=*jr3d%iiq6%@=ec&5&g)e!r4-(')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJ_DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJ_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['*', 'localhost']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '']
 
 # Application definition
 
@@ -45,12 +43,14 @@ INSTALLED_APPS = [
 
     'core',
     'todo_api',
+    'user_api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -159,6 +159,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
 
-# Custom user model
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = [
+    # List your allowed origins here
+    'http://localhost:3000',
+]
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_REDIRECTS = False
 
+# Default user model
 AUTH_USER_MODEL = 'core.User'
+
+# Rest framework configuration
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
+# APPEND_SLASH = False
