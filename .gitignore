@@ -187,6 +187,7 @@ fabric.properties
 
 ### Ignore
 docs/
+.tmp/
 
 ### Ignore for IntelliJ
 *.iml
