@@ -14,15 +14,6 @@ from .serializers import UserSerializer, AuthSerializer
 User = get_user_model()
 
 
-class UserConnectionView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def post(self, request, *args, **kwargs):
-        return Response({
-            "detail": "Connection successfully!"
-        })
-
-
 class UserTokenView(ObtainAuthToken):
     serializer_class = AuthSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES

@@ -4,11 +4,11 @@ Core models
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from .utils import check_email
+from uuid import uuid4
 
 
 class UserManager(BaseUserManager):
     """Users manager to create user and superuser."""
-
     def create_user(self, email, password=None, **kwargs):
         """Create new user."""
         if not email:
@@ -33,17 +33,22 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Users in system."""
+    userId = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True, null=False, blank=False)
+    username = models.CharField(max_length=45, blank=False, null=False, unique=True)
     password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    # REQUIRED_FIELDS = ['instance_name']
+    REQUIRED_FIELDS = ['username']
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"

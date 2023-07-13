@@ -5,6 +5,7 @@ import sys
 import os
 import dotenv
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,13 +45,22 @@ INSTALLED_APPS = [
     'core',
     'todo_api',
     'user_api',
+    'auth_api',
+
+    'django.contrib.sites',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'todo_project.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -159,13 +169,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
 
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOWED_ORIGINS = [
-    # List your allowed origins here
-    'http://localhost:3000',
-]
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_REDIRECTS = False
+# CORS configuration
+CORS_ORIGIN_ALLOW_ALL = True  # only for dev environment!, this should be changed before you push to production
 
 # Default user model
 AUTH_USER_MODEL = 'core.User'
@@ -173,10 +178,53 @@ AUTH_USER_MODEL = 'core.User'
 # Rest framework configuration
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
+
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
 }
 
-# APPEND_SLASH = False
+
+# Rest Authentication From dj-rest-auth
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'user_api.serializers.UserSerializer',
+}
+
+REST_AUTH = {
+    'USE_JWT': True,
+}
+
+SITE_ID = 1  # https://dj-rest-auth.readthedocs.io/en/latest/installation.html#registration-optional
+REST_USE_JWT = True  # use JSON Web
+
+# # Social authentication configuration
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+            "openid",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "VERIFIED_EMAIL": True,
+    }
+}
+
+# JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    "USER_ID_FIELD": "userId",  # for the custom user model
+    "USER_ID_CLAIM": "user_id",
+    "SIGNING_KEY": os.getenv('JWT_SECRET_KEY')
+}

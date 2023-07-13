@@ -9,11 +9,12 @@ from rest_framework import status
 from todo_api.models import Task, TaskList
 from todo_api.serializers import TaskSerializer, TaskDetailSerializer
 
-TASKS_URL = reverse('todo_api:task-list')
+TASKS_URL = reverse('todo_api:tasks-list')
+TASKS_COUNT_URL = reverse('todo_api:tasks-count')
 
 
 def task_detail_url_pk(pk):
-    return reverse('todo_api:task-detail', args=[pk, ])
+    return reverse('todo_api:tasks-detail', args=[pk, ])
 
 
 def create_task(user, **params):
@@ -209,12 +210,12 @@ class TestPrivateTaskAPI(TestCase):
 
     def test_fully_update_task(self):
         """Test updating a task with put"""
-        list = create_list(user=self.user)
+        list_task = create_list(user=self.user)
         task = create_task(user=self.user)
         payload = {
             'title': 'New Title',
             'completed': True,
-            'task_list': list.pk,
+            'task_list': list_task.pk,
             'due_date': timezone.now(),
         }
         url = task_detail_url_pk(task.pk)
@@ -222,3 +223,57 @@ class TestPrivateTaskAPI(TestCase):
         task.refresh_from_db()
         self.assertEqual(task.title, payload['title'])
         self.assertEqual(task.created_by, self.user)
+
+    def test_update_task_failure_unauthorized(self):
+        """Test update task failure"""
+        task_two = create_task(user=get_user_model().objects.create(email='user@email.com', password='password19573'))
+        task = create_task(user=self.user)
+        payload = {'title': 'Other Title', 'completed': True}
+        url = task_detail_url_pk(task_two.pk)
+        res = self.client.put(url, payload)
+        task.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertNotEqual(task_two.title, payload['title'])
+        self.assertNotEqual(task_two.completed, payload['completed'])
+        self.assertNotEqual(task_two.created_by, self.user)
+
+    def test_retrieve_count_tasks(self):
+        """Test retrieving count of tasks"""
+        create_task(user=self.user, completed=True)
+        create_task(user=self.user, completed=True)
+        create_task(user=self.user, completed=False)
+
+        res = self.client.get(TASKS_COUNT_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(res.data['total'], 3)
+        self.assertEqual(res.data['completed'], 2)
+        self.assertEqual(res.data['uncompleted'], 1)
+
+    def test_retrieve_count_tasks_by_list(self):
+        """Test retrieving count of tasks by list"""
+        list = create_list(user=self.user, name='shopping')
+        list2 = create_list(user=self.user, name='job')
+        create_task(user=self.user, completed=True, task_list=list)
+        create_task(user=self.user, completed=True, task_list=list)
+        create_task(user=self.user, completed=False, task_list=list)
+        create_task(user=self.user, completed=True, task_list=list2)
+        create_task(user=self.user, completed=True, task_list=list2)
+        create_task(user=self.user, completed=False, task_list=list2)
+
+        params = {
+            'list': 'shopping'
+        }
+
+        res = self.client.get(TASKS_COUNT_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(res.data['total'], 3)
+        self.assertEqual(res.data['completed'], 2)
+        self.assertEqual(res.data['uncompleted'], 1)
+
+    def test_retrieve_upcoming_task(self):
+        """Test retrieving upcoming tasks using due_date"""
+        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=1))
+        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=2))
+        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=3))

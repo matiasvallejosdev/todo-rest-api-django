@@ -9,7 +9,8 @@ from rest_framework import status
 from todo_api.models import Task, TaskList
 from todo_api.serializers import TaskListSerializer
 
-TASKS_LISTS_URL = reverse('todo_api:lists')
+TASKS_LISTS_URL = reverse('todo_api:lists-list')
+TASK_LIST_PK_URL = reverse('todo_api:lists-find-by-name')
 
 
 def create_task_list(user, **params):
@@ -20,6 +21,7 @@ def create_task_list(user, **params):
     return TaskList.objects.create(created_by=user, **payload)
 
 
+# TODO: Get list primary key from name field
 class TestPublicTaskListAPI(TestCase):
     """Test unauthorized API Request"""
 
@@ -50,7 +52,7 @@ class TestPrivateTaskListAPI(TestCase):
 
         res = self.client.get(TASKS_LISTS_URL)
 
-        tasks_list = TaskList.objects.all().order_by('-id')
+        tasks_list = TaskList.objects.all().order_by('created_at')
         serializer = TaskListSerializer(tasks_list, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -69,9 +71,24 @@ class TestPrivateTaskListAPI(TestCase):
 
         res = self.client.get(TASKS_LISTS_URL)
 
-        tasks_list = TaskList.objects.filter(created_by=self.user).order_by('-id')
+        tasks_list = TaskList.objects.filter(created_by=self.user).order_by('created_at')
         serializer = TaskListSerializer(tasks_list, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
         self.assertEqual(len(res.data), 2)
+
+    def test_retrieve_list_pk_from_name(self):
+        """Test retrieve list primary key from name field"""
+        list_1 = create_task_list(user=self.user, name='List 1')
+        list_2 = create_task_list(user=self.user, name='List 2')
+        list_3 = create_task_list(user=self.user, name='List 3')
+
+        payload = {
+            'list_name': list_2.name
+        }
+
+        res = self.client.get(TASK_LIST_PK_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_2.id, res.data['id'])
