@@ -13,6 +13,14 @@ TASKS_URL = reverse('todo_api:tasks-list')
 TASKS_COUNT_URL = reverse('todo_api:tasks-count')
 
 
+def create_user(email='user@example.com', password='userexample123'):
+    payload = {
+        'email': email,
+        'password': password,
+    }
+    return get_user_model().objects.create_user(**payload)
+
+
 def task_detail_url_pk(pk):
     return reverse('todo_api:tasks-detail', args=[pk, ])
 
@@ -50,10 +58,7 @@ class TestPrivateTaskAPI(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
-            email='user@example.com',
-            password='userexample123'
-        )
+        self.user = create_user()
         self.client.force_authenticate(user=self.user)
 
     def test_retrieve_tasks(self):
@@ -70,7 +75,8 @@ class TestPrivateTaskAPI(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_retrieve_tasks_limited_to_user(self):
-        user_two = get_user_model().objects.create(email='email@test.com', password='userexample123')
+        """Test retrieve list of tasks limited to user"""
+        user_two = create_user(email='email@test.com', password='userexample123')
         create_task(user=user_two)
         create_task(user=self.user)
         create_task(user=self.user)

@@ -1,8 +1,7 @@
 """
 Views for todo_api endpoints
 """
-from rest_framework import permissions, viewsets, status, generics
-from rest_framework.views import APIView
+from rest_framework import permissions, viewsets, status
 from .models import Task, TaskList
 from .serializers import (TaskSerializer, TaskDetailSerializer,
                           TaskCreateSerializer, TaskListSerializer,
@@ -76,7 +75,7 @@ class TaskListViewSet(viewsets.ModelViewSet):
         name = request.query_params.get('list_name', None)
         if name:
             name = str(name).lower()
-            task_lists = self.get_queryset().get(name__contains=name)
+            task_lists = self.get_queryset().get(name__iexact=name)
             if task_lists:
                 serializer = TaskListSerializer(task_lists, many=False)
                 return Response(serializer.data)

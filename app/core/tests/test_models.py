@@ -41,6 +41,19 @@ class TestModels(TestCase):
             with self.assertRaises(ValueError):
                 get_user_model().objects.create_user(email=email, password=password)
 
+    def test_create_user_without_username(self):
+        """Test creating user without username successfully instancing new random username"""
+        sample_emails = [
+            ['test1@EXAMPLE.COM', 'test1@example.com'],
+            ['Test2@example.com', 'test2@example.com'],
+            ['test_3@example.com', 'test_3@example.com'],
+            ['test4@EXample.COM', 'test4@example.com'],
+        ]
+        password = '1a9r86'
+        for email, expected in sample_emails:
+            user = get_user_model().objects.create_user(email=email, password=password)
+            self.assertIsNotNone(user.username)
+
     def test_create_superuser(self):
         """Test create superuser with password"""
         email = 'test@example.com'

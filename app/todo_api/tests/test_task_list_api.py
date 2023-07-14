@@ -1,12 +1,11 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from todo_api.models import Task, TaskList
+from todo_api.models import TaskList
 from todo_api.serializers import TaskListSerializer
 
 TASKS_LISTS_URL = reverse('todo_api:lists-list')
@@ -80,9 +79,9 @@ class TestPrivateTaskListAPI(TestCase):
 
     def test_retrieve_list_pk_from_name(self):
         """Test retrieve list primary key from name field"""
-        list_1 = create_task_list(user=self.user, name='List 1')
+        create_task_list(user=self.user, name='List 1')
         list_2 = create_task_list(user=self.user, name='List 2')
-        list_3 = create_task_list(user=self.user, name='List 3')
+        create_task_list(user=self.user, name='List 3')
 
         payload = {
             'list_name': list_2.name

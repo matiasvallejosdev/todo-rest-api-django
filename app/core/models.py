@@ -7,8 +7,14 @@ from .utils import check_email
 from uuid import uuid4
 
 
+def create_random_username():
+    """Create random username."""
+    return uuid4().hex[:30]
+
+
 class UserManager(BaseUserManager):
     """Users manager to create user and superuser."""
+
     def create_user(self, email, password=None, **kwargs):
         """Create new user."""
         if not email:
@@ -17,7 +23,13 @@ class UserManager(BaseUserManager):
             email = str(email).lower()
             if check_email(email) is False:
                 raise ValueError('Email must be in the correct format')
-        user = self.model(email=self.normalize_email(email), **kwargs)
+
+        if not kwargs.get('username'):
+            username = create_random_username()
+        else:
+            username = kwargs['username'].lower()
+
+        user = self.model(username=username, email=self.normalize_email(email), **kwargs)
         user.set_password(password)
         user.save(using=self.db)
         return user
@@ -33,7 +45,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Users in system."""
-    userId = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
+    id = None  # Set id field to None
+    user_id = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True, null=False, blank=False)
     username = models.CharField(max_length=45, blank=False, null=False, unique=True)
     password = models.CharField(max_length=255)

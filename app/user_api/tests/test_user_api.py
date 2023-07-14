@@ -9,8 +9,7 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 
 CREATE_USER_URL = reverse('user_api:create')
-TOKEN_URL = reverse('user_api:token')
-CONNECTION_URL = reverse('user_api:connection')
+CONNECTION_URL = reverse('auth_api:connection-verify')
 ME_URL = reverse('user_api:me')
 
 
@@ -31,9 +30,9 @@ class TestPublicUserAPI(TestCase):
         }
         res = self.client.post(CREATE_USER_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        exists = get_user_model().objects.filter(id=res.data['id']).exists()
+        exists = get_user_model().objects.filter(user_id=res.data['user_id']).exists()
         self.assertTrue(exists)
-        user = get_user_model().objects.get(id=res.data['id'])
+        user = get_user_model().objects.get(user_id=res.data['user_id'])
         self.assertEqual(res.data['email'], payload['email'])
         self.assertEqual(res.data['first_name'], payload['first_name'])
         self.assertEqual(res.data['last_name'], payload['last_name'])
@@ -73,40 +72,6 @@ class TestPublicUserAPI(TestCase):
         payload = {}
         res = self.client.post(CREATE_USER_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_create_token_successfully(self):
-        """Test create valid token with user."""
-        payload = {
-            'email': 'test@example.com',
-            'password': 'test123',  # min_length = 5
-        }
-        get_user_model().objects.create_user(**payload)
-        res = self.client.post(TOKEN_URL, payload)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn('token', res.data)
-
-    def test_create_invalid_token(self):
-        """Test create invalid token password not correct."""
-        payload = {
-            'email': 'test@example.com',
-            'password': 'test123',  # min_length = 5
-        }
-        get_user_model().objects.create_user(**payload)
-        payload.update({'password': 'invalidpassword'})
-        res = self.client.post(TOKEN_URL, payload)
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertNotIn('token', res.data)
-
-    def test_create_token_invalid_empty_parameters(self):
-        """Test create invalid token payload empty."""
-        payload = {
-            'email': 'test@example.com',
-            'password': 'test123',  # min_length = 5
-        }
-        get_user_model().objects.create_user(**payload)
-        res = self.client.post(TOKEN_URL, {})
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertNotIn('token', res.data)
 
     def test_connection_invalid_credentials(self):
         """Test connection invalid credentials."""

@@ -1,6 +1,5 @@
-from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-
+from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from .models import User
@@ -8,7 +7,7 @@ from .models import User
 
 class UserAdmin(BaseUserAdmin):
     """Define the admin pages for users."""
-    ordering = ['userId']
+    ordering = ['user_id']
     list_display = ['email', 'first_name', 'last_name']
     fieldsets = (
         (None, {'fields': ('email', 'password')}),

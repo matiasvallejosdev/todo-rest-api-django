@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 from todo_api.models import Task, TaskList
-from datetime import datetime
 
 from django.utils import timezone
 
