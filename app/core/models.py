@@ -7,9 +7,7 @@ from .utils import check_email
 from uuid import uuid4
 
 
-def create_random_username():
-    """Create random username."""
-    return uuid4().hex[:30]
+
 
 
 class UserManager(BaseUserManager):
@@ -17,6 +15,10 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **kwargs):
         """Create new user."""
+        payload = {
+            'username': self.create_random_username()
+        }
+
         if not email:
             raise ValueError('Email must be provided')
         else:
@@ -24,12 +26,9 @@ class UserManager(BaseUserManager):
             if check_email(email) is False:
                 raise ValueError('Email must be in the correct format')
 
-        if not kwargs.get('username'):
-            username = create_random_username()
-        else:
-            username = kwargs['username'].lower()
+        payload.update(kwargs)
 
-        user = self.model(username=username, email=self.normalize_email(email), **kwargs)
+        user = self.model(email=self.normalize_email(email), **payload)
         user.set_password(password)
         user.save(using=self.db)
         return user
@@ -42,6 +41,10 @@ class UserManager(BaseUserManager):
         user.save(using=self.db)
         return user
 
+
+    def create_random_username(self):
+        """Create random username."""
+        return uuid4().hex[:30]
 
 class User(AbstractBaseUser, PermissionsMixin):
     """Users in system."""

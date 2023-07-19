@@ -18,7 +18,7 @@ dotenv.load_dotenv(dotenv_path)
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJ_SECRET_KEY', 'django-insecure-37cbt(ocio2#r4=ajf1^_p=*jr3d%iiq6%@=ec&5&g)e!r4-(')
+SECRET_KEY = os.environ.get('DJ_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJ_DEBUG') == 'True'
@@ -176,7 +176,6 @@ CORS_ORIGIN_ALLOW_ALL = True  # only for dev environment!, this should be change
 AUTH_USER_MODEL = 'core.User'
 
 # Rest framework configuration
-
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
@@ -189,10 +188,8 @@ REST_FRAMEWORK = {
     ),
 }
 
-
-# Rest Authentication From dj-rest-auth
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'user_api.serializers.UserSerializer',
+    'USER_DETAILS_SERIALIZER': 'core.serializers.UserSerializer',
 }
 
 REST_AUTH = {

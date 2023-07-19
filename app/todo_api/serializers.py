@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from todo_api.models import Task, TaskList
 
-from user_api.serializers import UserSerializer
+from core.serializers import UserSerializer
 
 
 class TaskListSerializer(ModelSerializer):
