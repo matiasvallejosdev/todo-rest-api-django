@@ -6,7 +6,7 @@
 
 Todo-Rest-API is a powerful Tasks Management REST API developed using Python and Django REST Framework. This project serves as the backend for a task management application and includes features such as social authentication using Google, unit testing with Test Driven Development (TDD) principles, and integration with MySQL database. The ultimate goal of this project is to imitate the functionality of "https://www.getminimalist.com/" while providing seamless integration with the frontend application developed in Next.js.
 
-![Application Demo](https://example.com/path/to/demo-gif.gif) (Replace this link with a relevant demo GIF or image if available)
+![Application Demo](https://example.com/path/to/demo-gif.gif)
 
 ## Key Features
 
