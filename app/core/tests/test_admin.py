@@ -42,7 +42,7 @@ class TestAdmin(TestCase):
 
     def test_edit_user_page(self):
         """Test editing user on page."""
-        url = reverse('admin:core_user_change', args=[self.user.user_id])
+        url = reverse('admin:core_user_change', args=[self.user.userId])
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, 200)

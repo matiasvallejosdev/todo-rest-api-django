@@ -20,5 +20,5 @@ class ConnectionView(APIView):
     # noinspection PyMethodMayBeStatic
     def post(self, request, *args, **kwargs):
         return Response({
-            "detail": "Connection successfully!"
+            "message": "Connection successfully!"
         })

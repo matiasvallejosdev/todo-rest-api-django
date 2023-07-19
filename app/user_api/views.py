@@ -9,12 +9,7 @@ from core.serializers import UserSerializer
 User = get_user_model()
 
 
-class UserCreateView(generics.CreateAPIView):
-    serializer_class = UserSerializer
-    permission_classes = (permissions.AllowAny,)
-
-
-class UserMeView(generics.RetrieveUpdateDestroyAPIView):
+class UserMeView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated,)
 

@@ -49,7 +49,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Users in system."""
     id = None  # Set id field to None
-    user_id = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
+    userId = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(max_length=255, unique=True, null=False, blank=False)
     username = models.CharField(max_length=45, blank=False, null=False, unique=True)
     password = models.CharField(max_length=255)

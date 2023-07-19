@@ -225,3 +225,13 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
     "SIGNING_KEY": os.getenv('JWT_SECRET_KEY')
 }
+
+# All auth social providers configuration
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
+            'secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
+        }
+    }
+}
