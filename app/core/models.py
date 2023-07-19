@@ -2,12 +2,13 @@
 Core models
 """
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from .utils import check_email
 from uuid import uuid4
-
-
-
 
 
 class UserManager(BaseUserManager):
@@ -15,16 +16,14 @@ class UserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **kwargs):
         """Create new user."""
-        payload = {
-            'username': self.create_random_username()
-        }
+        payload = {"username": self.create_random_username()}
 
         if not email:
-            raise ValueError('Email must be provided')
+            raise ValueError("Email must be provided")
         else:
             email = str(email).lower()
             if check_email(email) is False:
-                raise ValueError('Email must be in the correct format')
+                raise ValueError("Email must be in the correct format")
 
         payload.update(kwargs)
 
@@ -41,15 +40,18 @@ class UserManager(BaseUserManager):
         user.save(using=self.db)
         return user
 
-
     def create_random_username(self):
         """Create random username."""
         return uuid4().hex[:30]
 
+
 class User(AbstractBaseUser, PermissionsMixin):
     """Users in system."""
+
     id = None  # Set id field to None
-    userId = models.UUIDField(max_length=16, primary_key=True, default=uuid4, editable=False)
+    userId = models.UUIDField(
+        max_length=16, primary_key=True, default=uuid4, editable=False
+    )
     email = models.EmailField(max_length=255, unique=True, null=False, blank=False)
     username = models.CharField(max_length=45, blank=False, null=False, unique=True)
     password = models.CharField(max_length=255)
@@ -63,8 +65,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
