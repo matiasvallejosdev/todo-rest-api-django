@@ -30,4 +30,4 @@ jobs:
 
         - name: Lint with Flake8
           run: |
-            flake8 .
+            app/flake8 .
