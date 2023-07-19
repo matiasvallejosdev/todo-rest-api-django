@@ -21,3 +21,4 @@ django-allauth==0.50.0
 djangorestframework-simplejwt==5.2.2
 
 PyJWT==2.7.0
+flake8==4.0.1
