@@ -8,16 +8,20 @@ from rest_framework import status
 from todo_api.models import TaskList
 from todo_api.serializers import TaskListSerializer
 
-TASKS_LISTS_URL = reverse('todo_api:lists-list')
+TASKS_LISTS_URL = reverse("todo_api:lists-list")
+
 
 def list_detail_url_list(list_uuid):
-    return reverse('todo_api:lists-detail', args=[list_uuid,])
+    return reverse(
+        "todo_api:lists-detail",
+        args=[
+            list_uuid,
+        ],
+    )
 
 
 def create_task_list(user, **params):
-    payload = {
-        'name': 'List'
-    }
+    payload = {"name": "List"}
     payload.update(params)
     return TaskList.objects.create(created_by=user, **payload)
 
@@ -39,8 +43,7 @@ class TestPrivateTaskListAPI(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email='user@example.com',
-            password='userexample123'
+            email="user@example.com", password="userexample123"
         )
         self.client.force_authenticate(user=self.user)
 
@@ -52,7 +55,7 @@ class TestPrivateTaskListAPI(TestCase):
 
         res = self.client.get(TASKS_LISTS_URL)
 
-        tasks_list = TaskList.objects.all().order_by('created_at')
+        tasks_list = TaskList.objects.all().order_by("created_at")
         serializer = TaskListSerializer(tasks_list, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -62,8 +65,7 @@ class TestPrivateTaskListAPI(TestCase):
     def test_retrieve_list_tasks_limited_to_user(self):
         """Test retrieve list of tasks lists limited to user"""
         user_two = get_user_model().objects.create(
-            email='usertwo@example.com',
-            password='userexample123'
+            email="usertwo@example.com", password="userexample123"
         )
         create_task_list(user=user_two)
         create_task_list(user=self.user)
@@ -71,7 +73,9 @@ class TestPrivateTaskListAPI(TestCase):
 
         res = self.client.get(TASKS_LISTS_URL)
 
-        tasks_list = TaskList.objects.filter(created_by=self.user).order_by('created_at')
+        tasks_list = TaskList.objects.filter(created_by=self.user).order_by(
+            "created_at"
+        )
         serializer = TaskListSerializer(tasks_list, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -80,21 +84,20 @@ class TestPrivateTaskListAPI(TestCase):
 
     def test_retrieve_list_pk_from_name(self):
         """Test retrieve list primary key from name field"""
-        create_task_list(user=self.user, name='List 1')
-        list_2 = create_task_list(user=self.user, name='List 2')
-        create_task_list(user=self.user, name='List 3')
+        create_task_list(user=self.user, name="List 1")
+        list_2 = create_task_list(user=self.user, name="List 2")
+        create_task_list(user=self.user, name="List 3")
 
         res = self.client.get(list_detail_url_list(list_2.list_uuid))
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(list_2.id, res.data['id'])
-        
+        self.assertEqual(list_2.id, res.data["id"])
+
     def test_retrieve_inbox_from_name(self):
         """Test retrieve and create if inbox not exists using slug name"""
-        url = list_detail_url_list('inbox')
+        url = list_detail_url_list("inbox")
         res = self.client.get(url)
-        exists = TaskList.objects.filter(name='inbox').exists()
-        
+        exists = TaskList.objects.filter(name="inbox").exists()
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(exists)
-                

@@ -9,35 +9,38 @@ from rest_framework import status
 from todo_api.models import Task, TaskList
 from todo_api.serializers import TaskSerializer, TaskDetailSerializer
 
-TASKS_URL = reverse('todo_api:tasks-list')
-TASKS_COUNT_URL = reverse('todo_api:tasks-count')
+TASKS_URL = reverse("todo_api:tasks-list")
+TASKS_COUNT_URL = reverse("todo_api:tasks-count")
 
 
-def create_user(email='user@example.com', password='userexample123'):
+def create_user(email="user@example.com", password="userexample123"):
     payload = {
-        'email': email,
-        'password': password,
+        "email": email,
+        "password": password,
     }
     return get_user_model().objects.create_user(**payload)
 
 
 def task_detail_url_pk(pk):
-    return reverse('todo_api:tasks-detail', args=[pk, ])
+    return reverse(
+        "todo_api:tasks-detail",
+        args=[
+            pk,
+        ],
+    )
 
 
 def create_task(user, **params):
     payload = {
-        'title': 'Task',
-        'completed': False,
+        "title": "Task",
+        "completed": False,
     }
     payload.update(params)
     return Task.objects.create(created_by=user, **payload)
 
 
 def create_list(user, **params):
-    payload = {
-        'name': 'List'
-    }
+    payload = {"name": "List"}
     payload.update(params)
     return TaskList.objects.create(created_by=user, **payload)
 
@@ -69,23 +72,22 @@ class TestPrivateTaskAPI(TestCase):
 
         res = self.client.get(TASKS_URL)
         print(res.data)
-        tasks = Task.objects.all().order_by('created_at')
+        tasks = Task.objects.all().order_by("created_at")
         serializer = TaskSerializer(tasks, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
-        
+
     def test_retrieve_tasks_failure_list_not_found(self):
         """Test retrieve list of tasks failure list not found"""
         create_task(user=self.user)
         create_task(user=self.user)
-        res = self.client.get(TASKS_URL, {'list': 'list-not-found'})
+        res = self.client.get(TASKS_URL, {"list": "list-not-found"})
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        
 
     def test_retrieve_tasks_limited_to_user(self):
         """Test retrieve list of tasks limited to user"""
-        user_two = create_user(email='email@test.com', password='userexample123')
+        user_two = create_user(email="email@test.com", password="userexample123")
         create_task(user=user_two)
         create_task(user=self.user)
         create_task(user=self.user)
@@ -93,7 +95,7 @@ class TestPrivateTaskAPI(TestCase):
         res = self.client.get(TASKS_URL)
         print(res.data)
 
-        tasks = Task.objects.filter(created_by=self.user).order_by('created_at')
+        tasks = Task.objects.filter(created_by=self.user).order_by("created_at")
         serializer = TaskSerializer(tasks, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -112,13 +114,10 @@ class TestPrivateTaskAPI(TestCase):
 
     def test_create_task_success(self):
         """Test creating task with success"""
-        payload = {
-            'title': 'Task Title',
-            'created_by': self.user
-        }
+        payload = {"title": "Task Title", "created_by": self.user}
         res = self.client.post(TASKS_URL, payload)
-        exists = Task.objects.filter(id=res.data['id']).exists()
-        task = Task.objects.get(id=res.data['id'])
+        exists = Task.objects.filter(id=res.data["id"]).exists()
+        task = Task.objects.get(id=res.data["id"])
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         for k, v in payload.items():
@@ -136,10 +135,11 @@ class TestPrivateTaskAPI(TestCase):
 
     def test_delete_task_failure_unauthorized(self):
         """Test delete task failure"""
-        taskTwo = create_task(user=get_user_model().objects.create(
-            email='base@example.com',
-            password='password123'
-        ))
+        taskTwo = create_task(
+            user=get_user_model().objects.create(
+                email="base@example.com", password="password123"
+            )
+        )
         res = self.client.delete(task_detail_url_pk(taskTwo.pk))
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         exists = Task.objects.filter(id=taskTwo.pk).exists()
@@ -149,16 +149,16 @@ class TestPrivateTaskAPI(TestCase):
         """Test creating a task with a list using list_uuid"""
         list = create_list(user=self.user)
         payload = {
-            'title': 'Task Title',
-            'created_by': self.user,
-            'task_list': list.list_uuid
+            "title": "Task Title",
+            "created_by": self.user,
+            "task_list": list.list_uuid,
         }
         res = self.client.post(TASKS_URL, payload)
-        exists = Task.objects.filter(id=res.data['id']).exists()
-        task = Task.objects.get(id=res.data['id'])
+        exists = Task.objects.filter(id=res.data["id"]).exists()
+        task = Task.objects.get(id=res.data["id"])
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.data['task_list'], payload['task_list'])
-        payload.pop('task_list')
+        self.assertEqual(res.data["task_list"], payload["task_list"])
+        payload.pop("task_list")
         for k, v in payload.items():
             self.assertEqual(getattr(task, k), v)
         self.assertTrue(exists)
@@ -166,16 +166,14 @@ class TestPrivateTaskAPI(TestCase):
 
     def test_filter_task_by_list(self):
         """Test list tasks by list."""
-        list = create_list(user=self.user, name='shopping')
-        list2 = create_list(user=self.user, name='job')
-        task = create_task(user=self.user, title='task one', task_list=list)
-        task2 = create_task(user=self.user, title='task one', task_list=list)
-        task3 = create_task(user=self.user, title='task two', task_list=list2)
-        task4 = create_task(user=self.user, title='task two')
+        list = create_list(user=self.user, name="shopping")
+        list2 = create_list(user=self.user, name="job")
+        task = create_task(user=self.user, title="task one", task_list=list)
+        task2 = create_task(user=self.user, title="task one", task_list=list)
+        task3 = create_task(user=self.user, title="task two", task_list=list2)
+        task4 = create_task(user=self.user, title="task two")
 
-        params = {
-            'list': list.list_uuid
-        }
+        params = {"list": list.list_uuid}
         res = self.client.get(TASKS_URL, params)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -191,16 +189,14 @@ class TestPrivateTaskAPI(TestCase):
         self.assertNotIn(serializer_task4.data, res.data)
 
     def test_filter_task_by_empty_list(self):
-        list = create_list(user=self.user, name='shopping')
-        list2 = create_list(user=self.user, name='job')
-        task = create_task(user=self.user, title='task one', task_list=list)
-        task2 = create_task(user=self.user, title='task one', task_list=list2)
-        task3 = create_task(user=self.user, title='task two')
-        task4 = create_task(user=self.user, title='task two')
+        list = create_list(user=self.user, name="shopping")
+        list2 = create_list(user=self.user, name="job")
+        task = create_task(user=self.user, title="task one", task_list=list)
+        task2 = create_task(user=self.user, title="task one", task_list=list2)
+        task3 = create_task(user=self.user, title="task two")
+        task4 = create_task(user=self.user, title="task two")
 
-        params = {
-            'list': 'inbox'
-        }
+        params = {"list": "inbox"}
         res = self.client.get(TASKS_URL, params)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
@@ -217,40 +213,44 @@ class TestPrivateTaskAPI(TestCase):
     def test_partial_update_task(self):
         """Test updating a task with patch"""
         task = create_task(user=self.user)
-        payload = {'title': 'New Title', 'completed': True}
+        payload = {"title": "New Title", "completed": True}
         url = task_detail_url_pk(task.task_uuid)
         self.client.patch(url, payload)
         task.refresh_from_db()
-        self.assertEqual(task.title, payload['title'])
-        self.assertEqual(task.completed, payload['completed'])
+        self.assertEqual(task.title, payload["title"])
+        self.assertEqual(task.completed, payload["completed"])
 
     def test_fully_update_task(self):
         """Test updating a task with put"""
         list_task = create_list(user=self.user)
         task = create_task(user=self.user)
         payload = {
-            'title': 'New Title',
-            'completed': True,
-            'task_list': list_task.list_uuid,
-            'due_date': timezone.now(),
+            "title": "New Title",
+            "completed": True,
+            "task_list": list_task.list_uuid,
+            "due_date": timezone.now(),
         }
         url = task_detail_url_pk(task.task_uuid)
         self.client.put(url, payload)
         task.refresh_from_db()
-        self.assertEqual(task.title, payload['title'])
+        self.assertEqual(task.title, payload["title"])
         self.assertEqual(task.created_by, self.user)
 
     def test_update_task_failure_unauthorized(self):
         """Test update task failure"""
-        task_two = create_task(user=get_user_model().objects.create(email='user@email.com', password='password19573'))
+        task_two = create_task(
+            user=get_user_model().objects.create(
+                email="user@email.com", password="password19573"
+            )
+        )
         task = create_task(user=self.user)
-        payload = {'title': 'Other Title', 'completed': True}
+        payload = {"title": "Other Title", "completed": True}
         url = task_detail_url_pk(task_two.pk)
         res = self.client.put(url, payload)
         task.refresh_from_db()
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertNotEqual(task_two.title, payload['title'])
-        self.assertNotEqual(task_two.completed, payload['completed'])
+        self.assertNotEqual(task_two.title, payload["title"])
+        self.assertNotEqual(task_two.completed, payload["completed"])
         self.assertNotEqual(task_two.created_by, self.user)
 
     def test_retrieve_count_tasks(self):
@@ -262,14 +262,14 @@ class TestPrivateTaskAPI(TestCase):
         res = self.client.get(TASKS_COUNT_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(res.data['total'], 3)
-        self.assertEqual(res.data['completed'], 2)
-        self.assertEqual(res.data['uncompleted'], 1)
+        self.assertEqual(res.data["total"], 3)
+        self.assertEqual(res.data["completed"], 2)
+        self.assertEqual(res.data["uncompleted"], 1)
 
     def test_retrieve_count_tasks_by_list(self):
         """Test retrieving count of tasks by list"""
-        list = create_list(user=self.user, name='shopping')
-        list2 = create_list(user=self.user, name='job')
+        list = create_list(user=self.user, name="shopping")
+        list2 = create_list(user=self.user, name="job")
         create_task(user=self.user, completed=True, task_list=list)
         create_task(user=self.user, completed=True, task_list=list)
         create_task(user=self.user, completed=False, task_list=list)
@@ -277,26 +277,31 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user, completed=True, task_list=list2)
         create_task(user=self.user, completed=False, task_list=list2)
 
-        params = {
-            'list': list.list_uuid
-        }
+        params = {"list": list.list_uuid}
 
         res = self.client.get(TASKS_COUNT_URL, params)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        self.assertEqual(res.data['total'], 3)
-        self.assertEqual(res.data['completed'], 2)
-        self.assertEqual(res.data['uncompleted'], 1)
+        self.assertEqual(res.data["total"], 3)
+        self.assertEqual(res.data["completed"], 2)
+        self.assertEqual(res.data["uncompleted"], 1)
 
     def test_retrieve_upcoming_task(self):
         """Test retrieving upcoming tasks using due_date"""
-        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=1))
-        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=2))
-        create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=3))
-        
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=1)
+        )
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=2)
+        )
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=3)
+        )
+
     def test_retrieve_count_error_task_not_found(self):
         """Test 404 not found list cannot count tasks"""
-        res = self.client.get(TASKS_COUNT_URL, {'list': 'list-not-found'})
+        res = self.client.get(TASKS_COUNT_URL, {"list": "list-not-found"})
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(res.data['message'], 
-                         'List was not found. We cannot count tasks.')
+        self.assertEqual(
+            res.data["message"], "List was not found. We cannot count tasks."
+        )

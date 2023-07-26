@@ -66,9 +66,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             except ValueError:
                 return Response(
                     status=status.HTTP_404_NOT_FOUND,
-                    data={
-                        "message": "Task list was not found. We cannot list tasks."
-                    },
+                    data={"message": "Task list was not found. We cannot list tasks."},
                 )
         return super().list(request, *args, **kwargs)
 
@@ -88,7 +86,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     def count_tasks(self, queryset, *args, **kwargs):
         """
         Count completed tasks and retrieve count.
-        If a task list is specified in the query parameters, it will count 
+        If a task list is specified in the query parameters, it will count
         the tasks in that list.
         If the list is not found, it will return a 404 error.
         """
