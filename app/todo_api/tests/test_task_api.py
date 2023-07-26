@@ -68,11 +68,20 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user)
 
         res = self.client.get(TASKS_URL)
+        print(res.data)
         tasks = Task.objects.all().order_by('created_at')
         serializer = TaskSerializer(tasks, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+        
+    def test_retrieve_tasks_failure_list_not_found(self):
+        """Test retrieve list of tasks failure list not found"""
+        create_task(user=self.user)
+        create_task(user=self.user)
+        res = self.client.get(TASKS_URL, {'list': 'list-not-found'})
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        
 
     def test_retrieve_tasks_limited_to_user(self):
         """Test retrieve list of tasks limited to user"""
@@ -82,6 +91,7 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user)
 
         res = self.client.get(TASKS_URL)
+        print(res.data)
 
         tasks = Task.objects.filter(created_by=self.user).order_by('created_at')
         serializer = TaskSerializer(tasks, many=True)
@@ -91,10 +101,10 @@ class TestPrivateTaskAPI(TestCase):
         self.assertEqual(len(res.data), 2)
 
     def test_retrieve_task_details(self):
-        """Test retrieving task's details from recipe."""
+        """Test retrieving task's details from uuid4."""
         task = create_task(user=self.user)
 
-        res = self.client.get(task_detail_url_pk(task.pk))
+        res = self.client.get(task_detail_url_pk(task.task_uuid))
         serializer = TaskDetailSerializer(task, many=False)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -119,7 +129,7 @@ class TestPrivateTaskAPI(TestCase):
     def test_delete_task_success(self):
         """Test delete task success"""
         task = create_task(user=self.user)
-        res = self.client.delete(task_detail_url_pk(task.pk))
+        res = self.client.delete(task_detail_url_pk(task.task_uuid))
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         exists = Task.objects.filter(id=task.pk).exists()
         self.assertFalse(exists)
@@ -136,12 +146,12 @@ class TestPrivateTaskAPI(TestCase):
         self.assertTrue(exists)
 
     def test_create_task_with_list(self):
-        """Test creating a task with a list"""
+        """Test creating a task with a list using list_uuid"""
         list = create_list(user=self.user)
         payload = {
             'title': 'Task Title',
             'created_by': self.user,
-            'task_list': list.pk
+            'task_list': list.list_uuid
         }
         res = self.client.post(TASKS_URL, payload)
         exists = Task.objects.filter(id=res.data['id']).exists()
@@ -164,7 +174,7 @@ class TestPrivateTaskAPI(TestCase):
         task4 = create_task(user=self.user, title='task two')
 
         params = {
-            'list': 'shopping'
+            'list': list.list_uuid
         }
         res = self.client.get(TASKS_URL, params)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -208,7 +218,7 @@ class TestPrivateTaskAPI(TestCase):
         """Test updating a task with patch"""
         task = create_task(user=self.user)
         payload = {'title': 'New Title', 'completed': True}
-        url = task_detail_url_pk(task.pk)
+        url = task_detail_url_pk(task.task_uuid)
         self.client.patch(url, payload)
         task.refresh_from_db()
         self.assertEqual(task.title, payload['title'])
@@ -221,10 +231,10 @@ class TestPrivateTaskAPI(TestCase):
         payload = {
             'title': 'New Title',
             'completed': True,
-            'task_list': list_task.pk,
+            'task_list': list_task.list_uuid,
             'due_date': timezone.now(),
         }
-        url = task_detail_url_pk(task.pk)
+        url = task_detail_url_pk(task.task_uuid)
         self.client.put(url, payload)
         task.refresh_from_db()
         self.assertEqual(task.title, payload['title'])
@@ -268,7 +278,7 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user, completed=False, task_list=list2)
 
         params = {
-            'list': 'shopping'
+            'list': list.list_uuid
         }
 
         res = self.client.get(TASKS_COUNT_URL, params)
@@ -283,3 +293,10 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=1))
         create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=2))
         create_task(user=self.user, due_date=timezone.now() + timezone.timedelta(days=3))
+        
+    def test_retrieve_count_error_task_not_found(self):
+        """Test 404 not found list cannot count tasks"""
+        res = self.client.get(TASKS_COUNT_URL, {'list': 'list-not-found'})
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.data['message'], 
+                         'List was not found. We cannot count tasks.')

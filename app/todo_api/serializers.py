@@ -10,8 +10,8 @@ class TaskListSerializer(ModelSerializer):
 
     class Meta:
         model = TaskList
-        fields = ('id', 'name', 'created_by',)
-        read_only_fields = ('id',)
+        fields = ('id', 'list_uuid', 'name', 'created_by',)
+        read_only_fields = ('id', 'list_uuid')
 
 
 class TaskSerializer(ModelSerializer):
@@ -19,8 +19,8 @@ class TaskSerializer(ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('id', 'title', 'completed',)
-        read_only_fields = ('id',)
+        fields = ('id', 'task_uuid', 'title', 'completed', 'task_list',)
+        read_only_fields = ('id', 'task_uuid',)
 
 
 class TaskCountSerializer(serializers.Serializer):
@@ -37,8 +37,9 @@ class TaskDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('id', 'title', 'completed', 'due_date', 'task_list', 'created_by', 'created_at',)
-        read_only_fields = ('id',)
+        fields = ('id', 'task_uuid', 'title', 'completed', 'due_date', 'task_list', 
+                  'created_by', 'created_at',)
+        read_only_fields = ('id', 'task_uuid',)
 
 
 class TaskCreateSerializer(ModelSerializer):
@@ -47,5 +48,6 @@ class TaskCreateSerializer(ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('id', 'title', 'completed', 'due_date', 'task_list', 'created_by',)
-        read_only_fields = ('id',)
+        fields = ('id', 'task_uuid', 'title', 'completed', 'due_date', 
+                  'task_list', 'created_by',)
+        read_only_fields = ('id', 'task_uuid',)

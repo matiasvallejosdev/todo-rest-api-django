@@ -9,7 +9,9 @@ from todo_api.models import TaskList
 from todo_api.serializers import TaskListSerializer
 
 TASKS_LISTS_URL = reverse('todo_api:lists-list')
-TASK_LIST_PK_URL = reverse('todo_api:lists-find-by-name')
+
+def list_detail_url_list(list_uuid):
+    return reverse('todo_api:lists-detail', args=[list_uuid,])
 
 
 def create_task_list(user, **params):
@@ -20,7 +22,6 @@ def create_task_list(user, **params):
     return TaskList.objects.create(created_by=user, **payload)
 
 
-# TODO: Get list primary key from name field
 class TestPublicTaskListAPI(TestCase):
     """Test unauthorized API Request"""
 
@@ -83,11 +84,17 @@ class TestPrivateTaskListAPI(TestCase):
         list_2 = create_task_list(user=self.user, name='List 2')
         create_task_list(user=self.user, name='List 3')
 
-        payload = {
-            'list_name': list_2.name
-        }
-
-        res = self.client.get(TASK_LIST_PK_URL, payload)
+        res = self.client.get(list_detail_url_list(list_2.list_uuid))
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(list_2.id, res.data['id'])
+        
+    def test_retrieve_inbox_from_name(self):
+        """Test retrieve and create if inbox not exists using slug name"""
+        url = list_detail_url_list('inbox')
+        res = self.client.get(url)
+        exists = TaskList.objects.filter(name='inbox').exists()
+        
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(exists)
+                
