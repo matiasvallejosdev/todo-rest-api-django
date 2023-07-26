@@ -23,7 +23,7 @@ SECRET_KEY = os.environ.get('DJ_SECRET_KEY', 'qlY+ujMXuNAHFEI0B1HEZA5X4E4ufnycM5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJ_DEBUG') == 'True'
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '']
+ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '.vercel.app']
 
 # Application definition
 
