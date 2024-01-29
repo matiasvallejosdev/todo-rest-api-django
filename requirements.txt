@@ -1,5 +1,5 @@
 django==4.0.0
-djangorestframework==3.12.4
+djangorestframework==3.14.0
 
 django-filter==2.4.0
 django-cors-headers==3.7.0
@@ -21,8 +21,9 @@ django-allauth==0.50.0
 djangorestframework-simplejwt==5.2.2
 
 PyJWT==2.7.0
-flake8==4.0.1
 
 dj-database-url==1.0.0
 whitenoise==6.2.0
 gunicorn==20.1.0
+
+flake8==6.0.0
