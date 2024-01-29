@@ -1,4 +1,3 @@
-from venv import create
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -93,7 +92,6 @@ class TestPrivateTaskListAPI(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(list_2.id, res.data["id"])
-    
 
     def test_retrieve_inbox_from_name(self):
         """Test retrieve and create if inbox not exists using slug name"""
@@ -103,7 +101,7 @@ class TestPrivateTaskListAPI(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(exists)
-        
+
     def test_retrieve_unique_inbox_for_each_account(self):
         """Test retrieve and create unique inbox for account"""
         user_two = get_user_model().objects.create(
@@ -118,13 +116,11 @@ class TestPrivateTaskListAPI(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(exists)
         self.assertNotEqual(list_inbox.list_uuid, list[0].list_uuid)
-        
+
     def test_fully_update_task_list(self):
         """Test partial update list with patch"""
         list = create_task_list(user=self.user)
-        payload = {
-            "name": "New name"
-        }
+        payload = {"name": "New name"}
         url = list_detail_url(list.list_uuid)
         res = self.client.patch(url, payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -137,8 +133,6 @@ class TestPrivateTaskListAPI(TestCase):
         )
         list = create_task_list(user=new_user)
         url = list_detail_url(list.list_uuid)
-        res = self.client.patch(url, {
-            "name": "new name"
-        })
+        res = self.client.patch(url, {"name": "new name"})
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertNotEqual(list.name, "new name")

@@ -143,7 +143,9 @@ class TaskListViewSet(viewsets.ModelViewSet):
         try:
             if list_uuid == "inbox":
                 # case inbox os is not created
-                inbox = TaskList.objects.filter(name="inbox", created_by=self.request.user).exists()  # noqa: E501
+                inbox = TaskList.objects.filter(
+                    name="inbox", created_by=self.request.user
+                ).exists()  # noqa: E501
                 if not inbox:
                     TaskList.objects.create(name="inbox", created_by=self.request.user)
                 queryset = queryset.get(name__iexact="inbox")
@@ -155,4 +157,3 @@ class TaskListViewSet(viewsets.ModelViewSet):
             )
         serializer = self.get_serializer(queryset, many=False)
         return Response(serializer.data)
-    
