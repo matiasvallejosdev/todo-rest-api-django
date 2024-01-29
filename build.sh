@@ -10,5 +10,5 @@ pip install -r requirements.txt
 python app/manage.py collectstatic --no-input
 python app/manage.py migrate
 
-python app/manage.py drop_test_database --no-input
+python app/manage.py drop_test_database --noinput
 python app/manage.py test
