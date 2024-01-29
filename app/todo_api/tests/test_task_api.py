@@ -71,7 +71,6 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user)
 
         res = self.client.get(TASKS_URL)
-        print(res.data)
         tasks = Task.objects.all().order_by("created_at")
         serializer = TaskSerializer(tasks, many=True)
 
@@ -93,7 +92,6 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user)
 
         res = self.client.get(TASKS_URL)
-        print(res.data)
 
         tasks = Task.objects.filter(created_by=self.user).order_by("created_at")
         serializer = TaskSerializer(tasks, many=True)

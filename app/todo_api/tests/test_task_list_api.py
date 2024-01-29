@@ -1,3 +1,4 @@
+from venv import create
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -11,7 +12,7 @@ from todo_api.serializers import TaskListSerializer
 TASKS_LISTS_URL = reverse("todo_api:lists-list")
 
 
-def list_detail_url_list(list_uuid):
+def list_detail_url(list_uuid):
     return reverse(
         "todo_api:lists-detail",
         args=[
@@ -88,16 +89,56 @@ class TestPrivateTaskListAPI(TestCase):
         list_2 = create_task_list(user=self.user, name="List 2")
         create_task_list(user=self.user, name="List 3")
 
-        res = self.client.get(list_detail_url_list(list_2.list_uuid))
+        res = self.client.get(list_detail_url(list_2.list_uuid))
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(list_2.id, res.data["id"])
+    
 
     def test_retrieve_inbox_from_name(self):
         """Test retrieve and create if inbox not exists using slug name"""
-        url = list_detail_url_list("inbox")
+        url = list_detail_url("inbox")
         res = self.client.get(url)
         exists = TaskList.objects.filter(name="inbox").exists()
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertTrue(exists)
+        
+    def test_retrieve_unique_inbox_for_each_account(self):
+        """Test retrieve and create unique inbox for account"""
+        user_two = get_user_model().objects.create(
+            email="usertwo@example.com", password="userexample123"
+        )
+        list_inbox = create_task_list(user=user_two, name="inbox")
+        url = list_detail_url("inbox")
+        res = self.client.get(url)
+        exists = TaskList.objects.filter(name="inbox", created_by=self.user).exists()
+        list = TaskList.objects.filter(name="inbox", created_by=self.user)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(exists)
+        self.assertNotEqual(list_inbox.list_uuid, list[0].list_uuid)
+        
+    def test_fully_update_task_list(self):
+        """Test partial update list with patch"""
+        list = create_task_list(user=self.user)
+        payload = {
+            "name": "New name"
+        }
+        url = list_detail_url(list.list_uuid)
+        res = self.client.patch(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        list.refresh_from_db()
+        self.assertEqual(list.name, payload["name"])
+
+    def test_update_unauthorized_failure(self):
+        new_user = get_user_model().objects.create_user(
+            email="user@new.com", password="usernew123"
+        )
+        list = create_task_list(user=new_user)
+        url = list_detail_url(list.list_uuid)
+        res = self.client.patch(url, {
+            "name": "new name"
+        })
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertNotEqual(list.name, "new name")

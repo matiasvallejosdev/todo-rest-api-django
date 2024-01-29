@@ -90,46 +90,46 @@ WSGI_APPLICATION = 'todo_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# MYSQL_DATABASE = os.getenv('MYSQL_DATABASE')
-# MYSQL_ROOT_PASSWORD = os.getenv('MYSQL_ROOT_PASSWORD')
-# MYSQL_DATABASE_HOST = os.getenv('MYSQL_DATABASE_HOST')
-# MYSQL_DATABASE_PORT = os.getenv('MYSQL_DATABASE_PORT')
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': MYSQL_DATABASE,
-#         'USER': 'root',
-#         'PASSWORD': MYSQL_ROOT_PASSWORD,
-#         'HOST': MYSQL_DATABASE_HOST,
-#         'PORT': MYSQL_DATABASE_PORT,
-#         'TEST': {
-#             'NAME': 'test_tododjango',
-#         },
-#     }
-# }
-
-# if 'test' in sys.argv or 'test_coverage' in sys.argv:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         }
-#     }
+MYSQL_DATABASE = os.getenv('MYSQL_DATABASE')
+MYSQL_ROOT_PASSWORD = os.getenv('MYSQL_ROOT_PASSWORD')
+MYSQL_DATABASE_HOST = os.getenv('MYSQL_DATABASE_HOST')
+MYSQL_DATABASE_PORT = os.getenv('MYSQL_DATABASE_PORT')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': MYSQL_DATABASE,
+        'USER': 'root',
+        'PASSWORD': MYSQL_ROOT_PASSWORD,
+        'HOST': MYSQL_DATABASE_HOST,
+        'PORT': MYSQL_DATABASE_PORT,
+        'TEST': {
+            'NAME': 'test_tododjango',
+        },
     }
 }
+
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa: E501
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -177,7 +177,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
 
 # CORS configuration
-CORS_ORIGIN_ALLOW_ALL = True  # only for dev environment!, this should be changed before you push to production
+CORS_ORIGIN_ALLOW_ALL = True  # only for dev environment!, this should be changed before you push to production  # noqa: E501
 
 # Default user model
 AUTH_USER_MODEL = 'core.User'
