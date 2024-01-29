@@ -6,6 +6,7 @@ import os
 import dotenv
 from pathlib import Path
 from datetime import timedelta
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,9 +22,14 @@ dotenv.load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get('DJ_SECRET_KEY', 'qlY+ujMXuNAHFEI0B1HEZA5X4E4ufnycM5B2ylFqwpY=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DJ_DEBUG') == 'True'
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '.vercel.app']
+
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
 
@@ -58,6 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'todo_project.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -90,39 +97,18 @@ WSGI_APPLICATION = 'todo_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-MYSQL_DATABASE = os.getenv('MYSQL_DATABASE')
-MYSQL_ROOT_PASSWORD = os.getenv('MYSQL_ROOT_PASSWORD')
-MYSQL_DATABASE_HOST = os.getenv('MYSQL_DATABASE_HOST')
-MYSQL_DATABASE_PORT = os.getenv('MYSQL_DATABASE_PORT')
-
+DATABASE_URL = os.environ.get("DATABASE_URL")
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': MYSQL_DATABASE,
-        'USER': 'root',
-        'PASSWORD': MYSQL_ROOT_PASSWORD,
-        'HOST': MYSQL_DATABASE_HOST,
-        'PORT': MYSQL_DATABASE_PORT,
-        'TEST': {
-            'NAME': 'test_tododjango',
-        },
-    }
+    'default': dj_database_url.config(DATABASE_URL)
 }
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
+        'default': dj_database_url.config(
+            default='sqlite:///db.sqlite3',
+            conn_max_age=600
+        )
     }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -154,8 +140,9 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+# This setting tells Django at which URL static files are going to be served to the user.
+# Here, they will be accessible at your-domain.onrender.com/static/...
 STATIC_URL = '/static/'
 MEDIA_URL = '/images/'
 
@@ -163,10 +150,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
-if not DEBUG:
+if not DEBUG:  # Tell Django to copy statics to the `staticfiles` directory
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
     MEDIA_ROOT = os.path.join(BASE_DIR, 'staticfiles/images')
-
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
