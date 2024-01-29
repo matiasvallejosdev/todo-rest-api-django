@@ -97,9 +97,16 @@ WSGI_APPLICATION = 'todo_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+# DATABASE_URL = os.environ.get("DATABASE_URL")
+# DATABASES = {
+#     'default': dj_database_url.config(DATABASE_URL)
+# }
+
 DATABASES = {
-    'default': dj_database_url.config(DATABASE_URL)
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3',
+        conn_max_age=600
+    )
 }
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
@@ -154,7 +161,7 @@ if not DEBUG:  # Tell Django to copy statics to the `staticfiles` directory
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
     MEDIA_ROOT = os.path.join(BASE_DIR, 'staticfiles/images')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
