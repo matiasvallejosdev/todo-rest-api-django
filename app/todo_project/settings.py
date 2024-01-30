@@ -99,7 +99,10 @@ WSGI_APPLICATION = 'todo_project.wsgi.application'
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 DATABASES = {
-    'default': dj_database_url.config(DATABASE_URL)
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600
+    )
 }
 
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
