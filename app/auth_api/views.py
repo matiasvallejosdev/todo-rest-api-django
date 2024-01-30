@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 class GoogleLoginView(SocialLoginView):  # Authorization Code grant
     adapter_class = GoogleOAuth2Adapter
-    callback_url = f"{os.environ.get("BASE_URL", 'http://localhost:3000')}/api/auth/callback/google"
+    callback_url = f"{os.environ.get('BASE_URL', 'http://localhost:3000')}/api/auth/callback/google"
     client_class = OAuth2Client
 
 
