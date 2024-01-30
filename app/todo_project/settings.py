@@ -12,21 +12,21 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment
-dotenv_path = os.path.join(BASE_DIR, '.env')
+dotenv_path = os.path.join(BASE_DIR, ".env")
 dotenv.load_dotenv(dotenv_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJ_SECRET_KEY', 'qlY+ujMXuNAHFEI0B1HEZA5X4E4ufnycM5B2ylFqwpY=')
+SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1', '.vercel.app']
+ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app"]
 
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -34,82 +34,88 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'rest_framework',
-    'rest_framework.authtoken',
-
-    'corsheaders',
-    'django_filters',
-    'django_extensions',
-
-    'core',
-    'todo_api',
-    'user_api',
-    'auth_api',
-
-    'django.contrib.sites',
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",
+    "django_filters",
+    "django_extensions",
+    "core",
+    "todo_api",
+    "user_api",
+    "auth_api",
+    "django.contrib.sites",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'todo_project.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "todo_project.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'todo_project.urls'
+ROOT_URLCONF = "todo_project.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'todo_project.wsgi.application'
+WSGI_APPLICATION = "todo_project.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600
-    )
-}
-
-if 'test' in sys.argv or 'test_coverage' in sys.argv:
+if DEBUG:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
     DATABASES = {
-        'default': dj_database_url.config(
-            default='sqlite:///db.sqlite3',
-            conn_max_age=600
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+else:
+    DB_NAME = os.getenv("MYSQL_DATABASE")
+    DB_PASSWORD = os.getenv("MYSQL_DATABASE_PASSWORD")
+    DB_USER = os.getenv("MYSQL_DATABASE_USER")
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": DB_NAME,
+            "PASSWORD": DB_PASSWORD,
+            "HOST": "localhost",  # or the hostname where your MySQL server is running
+            "PORT": "3306",
+        }
+    }
+
+if "test" in sys.argv or "test_coverage" in sys.argv:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default="sqlite:///db.sqlite3", conn_max_age=600
         )
     }
 
@@ -118,25 +124,25 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa: E501
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -146,22 +152,20 @@ USE_TZ = True
 
 # This setting tells Django at which URL static files are going to be served to the user.
 # Here, they will be accessible at your-domain.onrender.com/static/...
-STATIC_URL = '/static/'
-MEDIA_URL = '/images/'
+STATIC_URL = "/static/"
+MEDIA_URL = "/images/"
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 if not DEBUG:  # Tell Django to copy statics to the `staticfiles` directory
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'staticfiles/images')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles/")
+    MEDIA_ROOT = os.path.join(BASE_DIR, "staticfiles/images")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Test personalization
 
@@ -171,27 +175,24 @@ TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
 CORS_ORIGIN_ALLOW_ALL = True  # only for dev environment!, this should be changed before you push to production  # noqa: E501
 
 # Default user model
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = "core.User"
 
 # Rest framework configuration
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
-
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
     ),
 }
 
 REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'core.serializers.UserSerializer',
+    "USER_DETAILS_SERIALIZER": "core.serializers.UserSerializer",
 }
 
 REST_AUTH = {
-    'USE_JWT': True,
+    "USE_JWT": True,
 }
 
 SITE_ID = 1  # https://dj-rest-auth.readthedocs.io/en/latest/installation.html#registration-optional
@@ -214,22 +215,22 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # JWT Settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
     "USER_ID_FIELD": "userId",  # for the custom user model
     "USER_ID_CLAIM": "user_id",
-    "SIGNING_KEY": os.getenv('JWT_SECRET_KEY')
+    "SIGNING_KEY": os.getenv("JWT_SECRET_KEY"),
 }
 
 # All auth social providers configuration
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': os.environ.get('GOOGLE_CLIENT_ID'),
-            'secret': os.environ.get('GOOGLE_CLIENT_SECRET'),
+    "google": {
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_CLIENT_ID"),
+            "secret": os.environ.get("GOOGLE_CLIENT_SECRET"),
         }
     }
 }
