@@ -22,7 +22,7 @@ dotenv.load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app"]
 
@@ -94,11 +94,6 @@ WSGI_APPLICATION = "todo_project.wsgi.application"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 if DEBUG:
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    DATABASES = {
-        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
-    }
-else:
     DB_NAME = os.getenv("MYSQL_DATABASE")
     DB_PASSWORD = os.getenv("MYSQL_DATABASE_PASSWORD")
     DB_USER = os.getenv("MYSQL_DATABASE_USER")
@@ -110,6 +105,11 @@ else:
             "HOST": "localhost",  # or the hostname where your MySQL server is running
             "PORT": "3306",
         }
+    }
+else:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
 
 if "test" in sys.argv or "test_coverage" in sys.argv:
