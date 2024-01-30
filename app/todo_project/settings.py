@@ -22,7 +22,7 @@ dotenv.load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get("DJ_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", True)
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app"]
 
