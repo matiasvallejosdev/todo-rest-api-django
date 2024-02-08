@@ -126,7 +126,7 @@ class TestPrivateTaskListAPI(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         list.refresh_from_db()
         self.assertEqual(list.name, payload["name"])
-    
+
     def test_update_unauthorized_failure(self):
         new_user = get_user_model().objects.create_user(
             email="user@new.com", password="usernew123"

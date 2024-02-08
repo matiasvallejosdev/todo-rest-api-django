@@ -1,8 +1,8 @@
 """
 Views for todo_api endpoints
 """
+
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from rest_framework import permissions, viewsets, status
 from .models import Task, TaskList
 from .serializers import (
@@ -113,7 +113,9 @@ class TaskViewSet(viewsets.ModelViewSet):
                     if not exists:
                         return Response(
                             status=status.HTTP_404_NOT_FOUND,
-                            body={"message": "List was not found. We can not count tasks."},
+                            body={
+                                "message": "List was not found. We can not count tasks."
+                            },
                         )
                 except ValueError:
                     # If the conversion fails, handle the error gracefully
@@ -138,9 +140,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         """
         List all upcoming tasks scheduled ordered by date
         """
-        tasks = self.get_queryset().filter(due_date__isnull=False).order_by('due_date')
+        tasks = self.get_queryset().filter(due_date__isnull=False).order_by("due_date")
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
+
 
 class TaskListViewSet(viewsets.ModelViewSet):
     """Class for viewset task lists"""

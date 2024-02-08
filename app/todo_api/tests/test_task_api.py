@@ -316,20 +316,20 @@ class TestPrivateTaskAPI(TestCase):
         self.assertEqual(res.data["total"], 3)
         self.assertEqual(res.data["completed"], 2)
         self.assertEqual(res.data["uncompleted"], 1)
-    
+
     def test_retrieve_count_upcoming_tasks(self):
         """Test retrieving count of upcoming tasks"""
         list = create_list(user=self.user, name="inbox")
-        
+
         create_task(user=self.user, due_date=timezone.now(), task_list=list)
         create_task(user=self.user, due_date=timezone.now(), task_list=list)
         create_task(user=self.user)
-        
+
         params = {"list": "upcoming"}
-        
+
         res = self.client.get(TASKS_COUNT_URL, params)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        
+
         self.assertEqual(res.data["total"], 2)
         self.assertEqual(res.data["completed"], 0)
         self.assertEqual(res.data["uncompleted"], 2)
