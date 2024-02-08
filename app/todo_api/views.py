@@ -2,6 +2,7 @@
 Views for todo_api endpoints
 """
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import permissions, viewsets, status
 from .models import Task, TaskList
 from .serializers import (
@@ -91,34 +92,55 @@ class TaskViewSet(viewsets.ModelViewSet):
         If the list is not found, it will return a 404 error.
         """
         task_list = self.request.query_params.get("list", None)
-        if task_list and task_list != "inbox":
-            try:
-                task_list = unquote(task_list)  # Decode the URL-encoded string
-                task_list = str(task_list).lower().replace(" ", "-")
-                list_uuid = uuid.UUID(task_list)
-                exists = get_object_or_404(TaskList, list_uuid=list_uuid)
-                if not exists:
+        if task_list == "upcoming":
+            # Count upcoming tasks
+            tasks = Task.objects.filter(due_date__isnull=False)
+            tasks_completed = tasks.filter(completed=True).count()
+            tasks_uncompleted = tasks.filter(completed=False).count()
+            data = {
+                "total": tasks.count(),
+                "completed": tasks_completed,
+                "uncompleted": tasks_uncompleted,
+            }
+        else:
+            # Count inbox tasks or listed tasks using UUID
+            if task_list and task_list != "inbox":
+                try:
+                    task_list = unquote(task_list)  # Decode the URL-encoded string
+                    task_list = str(task_list).lower().replace(" ", "-")
+                    list_uuid = uuid.UUID(task_list)
+                    exists = get_object_or_404(TaskList, list_uuid=list_uuid)
+                    if not exists:
+                        return Response(
+                            status=status.HTTP_404_NOT_FOUND,
+                            body={"message": "List was not found. We can not count tasks."},
+                        )
+                except ValueError:
+                    # If the conversion fails, handle the error gracefully
                     return Response(
                         status=status.HTTP_404_NOT_FOUND,
-                        body={"message": "List was not found. We can not count tasks."},
+                        data={"message": "List was not found. We cannot count tasks."},
                     )
-            except ValueError:
-                # If the conversion fails, handle the error gracefully
-                return Response(
-                    status=status.HTTP_404_NOT_FOUND,
-                    data={"message": "List was not found. We cannot count tasks."},
-                )
-        tasks = self.get_queryset().count()
-        tasks_completed = self.get_queryset().filter(completed=True).count()
-        tasks_uncompleted = self.get_queryset().filter(completed=False).count()
-        data = {
-            "total": tasks,
-            "completed": tasks_completed,
-            "uncompleted": tasks_uncompleted,
-        }
+            tasks = self.get_queryset().count()
+            tasks_completed = self.get_queryset().filter(completed=True).count()
+            tasks_uncompleted = self.get_queryset().filter(completed=False).count()
+            data = {
+                "total": tasks,
+                "completed": tasks_completed,
+                "uncompleted": tasks_uncompleted,
+            }
+
         serializer = TaskCountSerializer(data, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=["GET"], detail=False, url_path="upcoming")
+    def upcoming_tasks(self, request, *args, **kwargs):
+        """
+        List all upcoming tasks scheduled ordered by date
+        """
+        tasks = self.get_queryset().filter(due_date__isnull=False).order_by('due_date')
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
 
 class TaskListViewSet(viewsets.ModelViewSet):
     """Class for viewset task lists"""

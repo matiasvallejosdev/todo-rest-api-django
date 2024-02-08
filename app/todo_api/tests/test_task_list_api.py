@@ -117,7 +117,7 @@ class TestPrivateTaskListAPI(TestCase):
         self.assertTrue(exists)
         self.assertNotEqual(list_inbox.list_uuid, list[0].list_uuid)
 
-    def test_fully_update_task_list(self):
+    def test_partial_update_task_list(self):
         """Test partial update list with patch"""
         list = create_task_list(user=self.user)
         payload = {"name": "New name"}
@@ -126,7 +126,7 @@ class TestPrivateTaskListAPI(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         list.refresh_from_db()
         self.assertEqual(list.name, payload["name"])
-
+    
     def test_update_unauthorized_failure(self):
         new_user = get_user_model().objects.create_user(
             email="user@new.com", password="usernew123"

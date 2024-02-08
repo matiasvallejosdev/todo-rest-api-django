@@ -29,6 +29,7 @@ class TaskSerializer(ModelSerializer):
             "task_uuid",
             "title",
             "completed",
+            "due_date",
             "task_list",
         )
         read_only_fields = (

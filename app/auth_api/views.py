@@ -19,7 +19,6 @@ class GoogleLoginView(SocialLoginView):  # Authorization Code grant
 class ConnectionView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
-    # noinspection PyMethodMayBeStatic
     def post(self, request, *args, **kwargs):
         return Response({
             "message": "Connection successfully!"

@@ -11,6 +11,7 @@ from todo_api.serializers import TaskSerializer, TaskDetailSerializer
 
 TASKS_URL = reverse("todo_api:tasks-list")
 TASKS_COUNT_URL = reverse("todo_api:tasks-count")
+TASKS_UPCOMING_URL = reverse("todo_api:tasks-upcoming")
 
 
 def create_user(email="user@example.com", password="userexample123"):
@@ -83,6 +84,28 @@ class TestPrivateTaskAPI(TestCase):
         create_task(user=self.user)
         res = self.client.get(TASKS_URL, {"list": "list-not-found"})
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_retrieve_upcoming_task(self):
+        """Test retrieving upcoming tasks using due_date"""
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=1)
+        )
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=2)
+        )
+        create_task(
+            user=self.user, due_date=timezone.now() + timezone.timedelta(days=3)
+        )
+        create_task(user=self.user)
+
+        res = self.client.get(TASKS_UPCOMING_URL, {})
+
+        tasks = Task.objects.filter(due_date__isnull=False).order_by("due_date")
+        serializer = TaskSerializer(tasks, many=True)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 3)
+        self.assertEqual(res.data, serializer.data)
 
     def test_retrieve_tasks_limited_to_user(self):
         """Test retrieve list of tasks limited to user"""
@@ -218,6 +241,16 @@ class TestPrivateTaskAPI(TestCase):
         self.assertEqual(task.title, payload["title"])
         self.assertEqual(task.completed, payload["completed"])
 
+    def test_partial_update_date(self):
+        """Test partial update task due_date"""
+        task = create_task(user=self.user)
+        payload = {"due_date": timezone.now()}
+        url = task_detail_url_pk(task.task_uuid)
+        self.client.patch(url, payload)
+
+        task.refresh_from_db()
+        self.assertEqual(task.due_date, payload["due_date"])
+
     def test_fully_update_task(self):
         """Test updating a task with put"""
         list_task = create_list(user=self.user)
@@ -283,18 +316,23 @@ class TestPrivateTaskAPI(TestCase):
         self.assertEqual(res.data["total"], 3)
         self.assertEqual(res.data["completed"], 2)
         self.assertEqual(res.data["uncompleted"], 1)
-
-    def test_retrieve_upcoming_task(self):
-        """Test retrieving upcoming tasks using due_date"""
-        create_task(
-            user=self.user, due_date=timezone.now() + timezone.timedelta(days=1)
-        )
-        create_task(
-            user=self.user, due_date=timezone.now() + timezone.timedelta(days=2)
-        )
-        create_task(
-            user=self.user, due_date=timezone.now() + timezone.timedelta(days=3)
-        )
+    
+    def test_retrieve_count_upcoming_tasks(self):
+        """Test retrieving count of upcoming tasks"""
+        list = create_list(user=self.user, name="inbox")
+        
+        create_task(user=self.user, due_date=timezone.now(), task_list=list)
+        create_task(user=self.user, due_date=timezone.now(), task_list=list)
+        create_task(user=self.user)
+        
+        params = {"list": "upcoming"}
+        
+        res = self.client.get(TASKS_COUNT_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        
+        self.assertEqual(res.data["total"], 2)
+        self.assertEqual(res.data["completed"], 0)
+        self.assertEqual(res.data["uncompleted"], 2)
 
     def test_retrieve_count_error_task_not_found(self):
         """Test 404 not found list cannot count tasks"""

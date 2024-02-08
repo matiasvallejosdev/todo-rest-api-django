@@ -15,5 +15,6 @@ app_name = 'todo_api'
 urlpatterns = [
     path('', include(router.urls)),
     path('tasks/count/', TaskViewSet.as_view({'GET': 'count'}), name='tasks-count'),
+    path('tasks/upcoming/', TaskViewSet.as_view({'GET': 'upcoming'}), name='tasks-upcoming'),
     path('lists/find-by-name/', TaskListViewSet.as_view({'GET': 'find-by-name'}), name='lists-find-by-name'),
 ]
