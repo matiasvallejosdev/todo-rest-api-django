@@ -1,7 +1,7 @@
 pip install -r requirements.txt
 
-python manage.py collectstatic --no-input
-python manage.py migrate
+python3.9 manage.py collectstatic --no-input
+python3.9 manage.py migrate
 
-python manage.py drop_test_database --noinput
-python manage.py test
+python3.9 manage.py drop_test_database --noinput
+python3.9 manage.py test
