@@ -1,6 +1,7 @@
 """
 Todo settings.py
 """
+
 import sys
 import os
 import dotenv
@@ -93,31 +94,30 @@ WSGI_APPLICATION = "todo_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-if DEBUG:
-    DB_NAME = os.getenv("MYSQL_DATABASE")
-    DB_PASSWORD = os.getenv("MYSQL_DATABASE_PASSWORD")
-    DB_USER = os.getenv("MYSQL_DATABASE_USER")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": DB_NAME,
-            "PASSWORD": DB_PASSWORD,
-            "HOST": "localhost",  # or the hostname where your MySQL server is running
-            "PORT": "3306",
-        }
-    }
-else:
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    DATABASES = {
-        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
-    }
+# if DEBUG:
+#     DB_NAME = os.getenv("MYSQL_DATABASE")
+#     DB_PASSWORD = os.getenv("MYSQL_DATABASE_PASSWORD")
+#     DB_USER = os.getenv("MYSQL_DATABASE_USER")
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.mysql",
+#             "NAME": DB_NAME,
+#             "PASSWORD": DB_PASSWORD,
+#             "HOST": "localhost",  # or the hostname where your MySQL server is running
+#             "PORT": "3306",
+#         }
+#     }
+# else:
 
-if "test" in sys.argv or "test_coverage" in sys.argv:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default="sqlite:///db.sqlite3", conn_max_age=600
-        )
-    }
+DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASES = {"default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)}
+
+# if "test" in sys.argv or "test_coverage" in sys.argv:
+#     DATABASES = {
+#         "default": dj_database_url.config(
+#             default="sqlite:///db.sqlite3", conn_max_age=600
+#         )
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
