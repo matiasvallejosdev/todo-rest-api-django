@@ -22,7 +22,7 @@ dotenv.load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get("SECRET_KEY", "SgLSDnEtU4kkqXJMYTJbKCq861VpNd5s")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", True)
 
 ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app", ".now.sh"]
 
