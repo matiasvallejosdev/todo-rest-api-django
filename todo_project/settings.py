@@ -22,9 +22,9 @@ dotenv.load_dotenv(dotenv_path)
 SECRET_KEY = os.environ.get("SECRET_KEY", "SgLSDnEtU4kkqXJMYTJbKCq861VpNd5s")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'RENDER' not in os.environ
+DEBUG = True
 
-ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app"]
+ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app", ".now.sh"]
 
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
@@ -158,7 +158,7 @@ MEDIA_URL = "/images/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 if not DEBUG:  # Tell Django to copy statics to the `staticfiles` directory
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles/")
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
     MEDIA_ROOT = os.path.join(BASE_DIR, "staticfiles/images")
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
