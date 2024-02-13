@@ -152,15 +152,12 @@ USE_TZ = True
 
 # This setting tells Django at which URL static files are going to be served to the user.
 # Here, they will be accessible at your-domain.onrender.com/static/...
-STATIC_URL = "/static/"
-MEDIA_URL = "/images/"
+STATIC_URL = "static/"
+MEDIA_URL = "images/"
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
-if not DEBUG:  # Tell Django to copy statics to the `staticfiles` directory
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
-    MEDIA_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "images")
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_DIRS = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "static")
+MEDIA_ROOT = os.path.join(BASE_DIR, "staticfiles_build", "images")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
