@@ -24,6 +24,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "SgLSDnEtU4kkqXJMYTJbKCq861VpNd5s")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", True)
+print("DEBUG: ", DEBUG)
 
 ALLOWED_HOSTS = ["*", "localhost", "127.0.0.1", ".vercel.app", ".now.sh"]
 
